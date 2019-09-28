@@ -14,22 +14,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 from django.http import HttpResponse,JsonResponse
 from django.shortcuts import render
-
 # 返回一个模板
 def tmpl_index(request):
-    return render(request,"index")
+    return render(request,"index.html",{"content":"hello","numbers":[1,2,5,6,3]})
 
 def index(request):
     return HttpResponse("hello django.")
 
 def json_return(request):
     return JsonResponse({"hello":"hello django."})
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/', index),
     path('json/', json_return),
     path('tmpl/', tmpl_index),
+    path('user/', include("user.urls")),
 ]
