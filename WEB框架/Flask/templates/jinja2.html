@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jinja2模板引擎</title>
+</head>
+<body>
+    {# 变量的使用 #}
+    <p>name: {{name}}</p>
+
+    {# 列表的使用 #}
+    <p>my_list:{{my_list}}</p>
+    <p>my_list 第一个元素：{{my_list[0]}},第二个元素：{{my_list.1}}</p>
+
+    {# 字典的使用 #}
+    <p>my_dict：{{my_dict}}</p>
+    <p>姓名：{{my_dict.name}}、年龄{{my_dict["age"]}}</p>
+
+    <hr>
+
+    {# 控制代码块 #}
+
+    <p>
+        for循环使用:
+        {% for item in my_list %}
+            {{item}}
+        {% endfor %}
+    </p>
+
+   <p>
+        使用 if 删选列表数据大于3的：
+        {% for item in my_list %}
+            {% if item > 3 %}
+                {{item}}
+            {% endif %}
+        {% endfor %}
+   </p>
+   <p>
+       <p>过滤器的使用：变量名 | 过滤器</p>
+       <p>字符串转大写：{{ name | upper }}</p>
+       <p>字符串反正：{{ name | reverse }}</p>
+       <p>列表第一个：{{ my_list | first}}、最后一个：{{ my_list | last}}</p>
+   </p>
+
+</body>
+</html>

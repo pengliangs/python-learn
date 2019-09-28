@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD</title>
+</head>
+
+<body>
+    <h3>9.CRUD.py</h3>
+    {% for msg in get_flashed_messages() %}
+        {{ msg }}
+    {% endfor %}
+    <form method="POST" action="/add">
+        用户名：<input type="text" name="username"><br>
+        年龄：<input type="number" name=age>
+        <button type="submit">提交</button>
+    </form>
+    <br><br>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>用户名</th>
+                <th>年龄</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in userList %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.username }}</td>
+                <td>{{ item.age }}</td>
+                <td>
+                    <a href="{{ url_for('delteUser',u_id=item.id) }}">删除</a>
+                </td>
+            </tr>
+            {% else %}
+                无
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

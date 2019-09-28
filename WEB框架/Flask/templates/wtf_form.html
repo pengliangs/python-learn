@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>wtf表单</title>
+</head>
+<body>
+    <h3>6.wtf表单.py</h3>
+    <form method="POST">
+        {{ form.csrf_token() }}
+        {{ form.username.label }} {{form.username}} <br>
+        {{ form.password.label }} {{form.password}} <br>
+        {{ form.passwordTwo.label }} {{form.passwordTwo}} <br>
+        {{form.submit}}
+    </form>
+    {% for msg in get_flashed_messages() %}
+        {{ msg }}
+    {% endfor %}
+</body>
+</html>

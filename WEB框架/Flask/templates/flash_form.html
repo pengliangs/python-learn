@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>flash消息表单</title>
+</head>
+<body>
+    <h3>5.flash给模板发送消息.py</h3>
+    <form method="post">
+        <div>
+            <label>用户名</label>
+            <input type="text" name="username">
+        </div>
+        <div>
+            <label>密码</label>
+            <input type="password" name="password">
+        </div>
+        <div>
+            <label>确认密码</label>
+            <input type="password" name="passwordTwo">
+        </div>
+        <div>
+            <button type="submit">提交</button>
+        </div>
+        {# 使用遍历获取闪现消息 #}
+        {% for msg in get_flashed_messages() %}
+         {{ msg }}
+        {% endfor %}
+    </form>
+</body>
+</html>
