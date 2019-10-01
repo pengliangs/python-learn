@@ -1,14 +1,14 @@
 ![scrapy体系结构](scrapy-structure.png)
 
-* Scheduler：所有待爬取和已爬取的交给 `Scheduler` 管理
-* Downloader：每次需要一个url地址的时候，我们要将这个URL交给 `Downloader`
-* Spiders：`Downloader` 下载完毕之后会返回一个 `response` 对象,交给 `Spiders` 爬虫解析器然后解析出有价值的数据，
-然后有新的URL又可以交给 `Scheduler`
+* Scheduler：所有待爬取和已爬取的由 `Scheduler` 管理
+* Downloader：将URL交给 `Downloader` 负责资源的下载
+* Spiders：`Downloader` 下载完毕之后会返回一个 `response` 对象,交给爬虫解析器（ `Spiders` ）然后解析出有价值的数据，
+然后有新的URL又可以交给 `Scheduler` 来调度管理
 * Item Pipeline ：将 `Spiders` 分析后有价值的数据封装成实体 `Items` 交给组件 `Item Pipeline` 而 `Item Pipeline` 
 主要是跟数据库打交道
 * ScraPy Engine：爬虫调度器，管理组件之间的调度
-* Middlewares：如果页面大量使用 ajax ，则可以是用该组件进行模拟然后将返回的信息交给 `Spiders`，也可以模拟 IP 防止
-服务器检查相同IP请求过多而被拉黑
+* Middlewares：有点像java中的拦截器，在请求发送的时候可以进行拦截，来实现 User-Agent 和 IP 的伪装；模拟 ajax点击
+将最终加载处理完的页面交给 `Spiders`
 
 # 安装 scrapy
 
@@ -232,5 +232,81 @@ ip伪装是将我们的请求发送给第三方服务器，然后由第三方转
             request.meta["proxy"] = proxyServer
 
             request.headers["Proxy-Authorization"] = proxyAuth    
+```
+
+# 自动登录
+
+```python
+# -*- coding: utf-8 -*-
+import scrapy
+
+
+class RenrenSpider(scrapy.Spider):
+    name = 'renren_spider'
+    allowed_domains = ['www.renren.com']
+    start_urls = ['http://www.renren.com/SysHome.do']
+
+    def parse(self, response):
+        # 使用 FormRequest 发送一个登录 form 表单，登录成功进入 callback
+        loginForm = {
+            "email":"xxx@qq.com",
+            "password":"xxx"
+        }
+        return scrapy.FormRequest(url="http://www.renren.com/PLogin.do",formdata=loginForm,callback=self.login_callback)
+
+
+    def login_callback(self,response):
+        print(response.text)
+```
+
+# 入库
+
+`spider` 处理返回的数据会交给 `pipelines` 触法调用 `process_item` 进行入库处理
+
+默认 `pipelines` 是没有开启的,在配置文件中开启
+
+```python
+# Configure item pipelines
+# See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+ITEM_PIPELINES = {
+   'jianshu.pipelines.JianshuPipeline': 300,
+}
+```
+JianshuPipeline.process_item 会被出发，然后做具体的入库操作
+
+```python
+# -*- coding: utf-8 -*-
+
+# Define your item pipelines here
+#
+# Don't forget to add your pipeline to the ITEM_PIPELINES setting
+# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+
+import pymysql
+
+class JianshuPipeline(object):
+
+    def __init__(self):
+        con_param = {
+            "host":"127.0.0.1",
+            "port":3306,
+            "database":"jianshu",
+            "user":"root",
+            "password":"root"
+        }
+        self.db = pymysql.connect(**con_param)
+        self.cursor = self.db.cursor()
+
+    def process_item(self, item, spider):
+        try:
+            insert_sql = "INSERT INTO `jianshu_article_base_info` (`author_nickname`,`author_avatar`,`title`,`url`)\
+                 VALUES (%s, %s, %s,%s)"
+            self.cursor.execute(insert_sql,(item["author_nickname"],item["author_avatar"],item["title"],item["url"]))
+            self.db.commit()
+        except:
+            print("执行SQL异常")
+            self.db.rollback()
+
+        return item
 ```
 
